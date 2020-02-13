@@ -22,6 +22,7 @@ public class ShoppingListServlet extends HttpServlet {
     HttpSession session;  
     String userName;
     String addItem;
+    String userAction;
     ArrayList<String> itemList = new ArrayList<>();
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -67,12 +68,50 @@ public class ShoppingListServlet extends HttpServlet {
             throws ServletException, IOException {
         
         session = request.getSession();
-        session.setAttribute("userName", request.getParameter("userName"));
-        userName =(String) session.getAttribute("userName");
+        userAction = request.getParameter("userAction");
+        
+       
         System.out.println(userName);
         request.setAttribute("userName", userName);
         
-        getServletContext().getRequestDispatcher("/WEB-INF/shoppingList.jsp").forward(request, response);
+        if (userAction != null && !userAction.equals("")) {
+            if (userAction.equals("register")) {            
+                userName =(String) request.getAttribute("userName");
+                if (userName != null && !userName.equals("")) {
+                   session.setAttribute("userName", request.getParameter("userName"));
+                   session.setAttribute("itemList", itemList);
+                }
+               
+            }
+            else if (userAction.equals("add")) {
+                String itemToAdd = (String) request.getAttribute(addItem);
+                if (itemToAdd != null && !itemToAdd.equals("")) {
+                    itemList = (ArrayList<String>) session.getAttribute("itemList");
+                    itemList.add(itemToAdd);
+                    session.setAttribute("itemList", itemList);
+                }
+            }
+            else if (userAction.equals("delete")) {
+                String radSelect = request.getParameter("radSelect");
+                if (radSelect != null && !radSelect.equals("")) {
+                    try {
+                        int selected = Integer.parseInt(radSelect);
+                    
+                    itemList = (ArrayList<String>) session.getAttribute("itemList");
+                    if (itemList == null) {
+                        itemList = new ArrayList<String>();
+                        itemList.remove(selected);
+                        session.setAttribute("itemList", itemList);
+                    }
+                    } catch (Exception e) {
+                                                       
+                    }
+                }
+            }
+        }
+        response.sendRedirect("ShoppingList");
+        
+        
     }
 
     /**
